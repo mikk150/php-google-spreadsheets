@@ -1,6 +1,6 @@
 <?php
 //make sure you include this file and call the constructor of class
-class googlespreadsheet {
+class GoogleSpreadsheet {
         private $token;
         private $spreadsheet;
         private $worksheet;
@@ -8,7 +8,7 @@ class googlespreadsheet {
         private $worksheetid;
         public function __construct() {
         }
-//consructed on call
+        //consructed on call
         public function authenticate($username, $password) {
                 $url = "https://www.google.com/accounts/ClientLogin";
                 $fields = array(
@@ -30,7 +30,7 @@ class googlespreadsheet {
                 //get response ....same status code as on ajax xhtmlp
                 $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
                 curl_close($curl);
-//status cofe are similar as in aax
+                //status cofe are similar as in aax
                 if($status == 200) {
                         if(stripos($response, "auth=") !== false) {
                                 preg_match("/auth=([a-z0-9_\-]+)/i", $response, $matches);
@@ -38,16 +38,16 @@ class googlespreadsheet {
                         }
                 }
         }
-//preg_match is a key of error handle in this case
-        public function settitleSpreadsheet($title) {
+        //preg_match is a key of error handle in this case
+        public function setTitleSpreadsheet($title) {
                 $this->spreadsheet = $title;
         }
-//finished setting the titel
-        public function settitleWorksheet($title) {
+        //finished setting the title
+        public function setTitleWorksheet($title) {
                 $this->worksheet = $title;
         }
-//choosing the worksheet
-        public function add_row($data) {
+        //choosing the worksheet
+        public function addRow($data) {
                 if(!empty($this->token)) {
                         $url = $this->getPostUrl();
                         if(!empty($url)) {
@@ -56,7 +56,7 @@ class googlespreadsheet {
                                         "Authorization: GoogleLogin auth=" . $this->token,
                                         "GData-Version: 3.0"
                                 );
-//need to retreive the id of collums
+                                //need to retreive the id of collums
                                 $columnIDs = $this->getColumnIDs();
                                 if($columnIDs) {
                                         $fields = '<entry xmlns="http://www.w3.org/2005/Atom" xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">';
@@ -66,7 +66,7 @@ class googlespreadsheet {
                                                         $fields .= "<gsx:$key><![CDATA[$value]]></gsx:$key>";
                                         }
                                         $fields .= '</entry>';
-//end constructor
+                                        //end constructor
                                         $curl = curl_init();
                                         curl_setopt($curl, CURLOPT_URL, $url);
                                         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -81,7 +81,7 @@ class googlespreadsheet {
                         }
                 }
         }
-//helper functions ...as defined in gogle api
+        //helper functions ...as defined in google api
         private function getColumnIDs() {
                 $url = "https://spreadsheets.google.com/feeds/cells/" . $this->spreadsheetid . "/" . $this->worksheetid . "/private/full?max-row=1";
                 $headers = array(
@@ -97,7 +97,7 @@ class googlespreadsheet {
 
                 $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
                 curl_close($curl);
-//url are for 3.0 ...shoud change on depracate
+                //url are for 3.0 ...shoud change on depracate
                 if($status == 200) {
                         $columnIDs = array();
                         $xml = simplexml_load_string($response);
@@ -108,10 +108,10 @@ class googlespreadsheet {
                         }               
                         return $columnIDs;              
                 }
-//no return functions exits sillent
+                //no return functions exits sillent
                 return "";
         }
-//need the url for post push method
+        //need the url for post push method
         private function getPostUrl() {
                 $url = "https://spreadsheets.google.com/feeds/spreadsheets/private/full?title=" . urlencode($this->spreadsheet);
                 $headers = array(
@@ -125,7 +125,7 @@ class googlespreadsheet {
                 curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
                 $response = curl_exec($curl);
                 $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-//let's compare statuses
+                //let's compare statuses
                 if($status == 200) {
                         $spreadsheetXml = simplexml_load_string($response);
                         if($spreadsheetXml->entry) {
@@ -133,7 +133,7 @@ class googlespreadsheet {
                                 $url = "https://spreadsheets.google.com/feeds/worksheets/" . $this->spreadsheetid . "/private/full";
                                 if(!empty($this->worksheet))
                                         $url .= "?title=" . $this->worksheet;
-//setopt 
+                                //setopt 
                                 curl_setopt($curl, CURLOPT_URL, $url);
                                 $response = curl_exec($curl);
                                 $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -150,8 +150,8 @@ class googlespreadsheet {
 
                 return "";
         }
-//no return
-//need to do a preformat on id of collom 
+        //no return
+        //need to do a preformat on id of collom 
         private function formatColumnID($val) {
                 return preg_replace("/[^a-zA-Z0-9.-]/", "", strtolower($val));
         }
